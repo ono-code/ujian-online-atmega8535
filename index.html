@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Online: Pemrograman Mikrokontroler ATMega8535 - BASCOM AVR</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre { font-family: 'Fira Code', monospace; }
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body, html { background: #fff !important; color: #000 !important; }
+            #app, main, #result-view { background: #fff !important; color: #000 !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+            .bg-slate-800, .bg-slate-900, .bg-slate-950, .bg-blue-900\/50, .bg-emerald-950\/40, .bg-red-950\/40 { background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; }
+            .text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400, .text-emerald-300, .text-red-300, .text-amber-400 { color: #000 !important; }
+            pre, code { background: #f8fafc !important; color: #0f172a !important; border: 1px solid #e2e8f0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col no-select" oncontextmenu="return false;">
+
+    <!-- APP CONTAINER -->
+    <div id="app" class="flex-grow flex flex-col">
+        <!-- HEADER / NAVBAR -->
+        <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-600 p-2 rounded-lg text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white tracking-wide">Ujian Mikrokontroler ATMega8535</h1>
+                        <p class="text-xs text-slate-400">Teknik Elektronika Industri (BASCOM-AVR)</p>
+                    </div>
+                </div>
+
+                <!-- TIMER & ANTI CHEAT BADGE (Active Exam) -->
+                <div id="top-exam-status" class="hidden flex items-center gap-4">
+                    <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2">
+                        <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <span>Pelanggaran: <span id="violation-count" class="font-bold text-amber-300">0</span></span>
+                    </div>
+
+                    <div class="bg-blue-950 border border-blue-700/50 px-4 py-1.5 rounded-lg flex items-center gap-2 font-mono text-base font-bold text-blue-300 shadow-inner">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="timer-display">90:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN VIEW PORT -->
+        <main class="flex-grow max-w-7xl w-full mx-auto p-4 flex flex-col justify-center">
+
+            <!-- 1. FORM IDENTITAS SISWA (LOGIN VIEW) -->
+            <div id="login-view" class="max-w-xl mx-auto w-full bg-slate-800 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600/20 text-blue-400 rounded-full mb-3 border border-blue-500/30">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Registrasi Peserta Ujian</h2>
+                    <p class="text-sm text-slate-400 mt-1">Masukkan data diri Anda secara jujur dan cermat</p>
+                </div>
+
+                <form id="student-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Nama Lengkap Siswa</label>
+                        <input type="text" id="input-nama" required placeholder="Contoh: Muhammad Rizky Pratama" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Kelas / Rombel</label>
+                            <input type="text" id="input-kelas" required placeholder="Contoh: XII TEI 1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">NIS / NISN</label>
+                            <input type="text" id="input-nis" required placeholder="Contoh: 202410892" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm">
+                        </div>
+                    </div>
+
+                    <!-- ATURAN ANTI NYONTEK -->
+                    <div class="bg-slate-900/80 border border-amber-500/30 rounded-xl p-4 text-xs text-slate-300 space-y-2 mt-4">
+                        <div class="flex items-center gap-2 text-amber-400 font-bold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <span>Aturan & Protokol Keamanan Ujian:</span>
+                        </div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-400">
+                            <li>Jumlah Soal: <b>100 Butir Pilihan Ganda</b> (Waktu: 90 Menit).</li>
+                            <li>Urutan Soal dan Opsi Jawaban diacak secara otomatis.</li>
+                            <li><b>Anti-Nyontek Aktif:</b> Dilarang keluar dari tab/browser atau menggunakan inspect element & copy-paste. Setiap pelanggaran akan dicatat dalam laporan guru.</li>
+                            <li>Sistem akan masuk ke layar penuh (Fullscreen) otomatis.</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition duration-200 shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 mt-6">
+                        <span>Mulai Mengerjakan Ujian</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- 2. EXAM INTERFACE VIEW -->
+            <div id="exam-view" class="hidden flex-grow flex flex-col lg:flex-row gap-6">
+                <!-- LEFT / MAIN: QUESTION BOX -->
+                <div class="flex-grow bg-slate-800 border border-slate-700 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <!-- SOAL HEADER -->
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-700 mb-6">
+                            <span class="text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-950 border border-blue-800/60 px-3 py-1 rounded-md">
+                                Soal No. <span id="current-question-num">1</span> dari 100
+                            </span>
+                            <button id="flag-btn" onclick="toggleFlag()" class="text-xs px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition border-slate-600 text-slate-400 hover:border-amber-500 hover:text-amber-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                <span id="flag-text">Ragu-ragu</span>
+                            </button>
+                        </div>
+
+                        <!-- SOAL TEXT & CODE -->
+                        <div class="space-y-4 mb-6">
+                            <h3 id="question-text" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed">
+                                Loading...
+                            </h3>
+                            <div id="code-snippet-container" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-4 overflow-x-auto text-emerald-400">
+                                <pre><code id="code-snippet"></code></pre>
+                            </div>
+                        </div>
+
+                        <!-- OPSI JAWABAN (A - E) -->
+                        <div id="options-container" class="space-y-3">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- FOOTER NAVIGATION -->
+                    <div class="flex items-center justify-between pt-6 mt-6 border-t border-slate-700">
+                        <button id="prev-btn" onclick="prevQuestion()" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium text-sm rounded-xl transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            <span>Sebelumnya</span>
+                        </button>
+                        <button id="next-btn" onclick="nextQuestion()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm rounded-xl transition flex items-center gap-2 shadow-md shadow-blue-600/30">
+                            <span>Berikutnya</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RIGHT SIDEBAR: NAVIGASI SOAL -->
+                <div class="w-full lg:w-80 bg-slate-800 border border-slate-700 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-700 mb-4">
+                            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                                Navigasi Soal
+                            </h4>
+                            <span id="answered-count-badge" class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-mono">0 / 100</span>
+                        </div>
+
+                        <!-- LEGEND -->
+                        <div class="grid grid-cols-3 gap-2 text-[10px] mb-4 text-slate-400 text-center">
+                            <div class="flex items-center gap-1 justify-center bg-slate-900 py-1 rounded border border-slate-700">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Dijawab
+                            </div>
+                            <div class="flex items-center gap-1 justify-center bg-slate-900 py-1 rounded border border-slate-700">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Ragu
+                            </div>
+                            <div class="flex items-center gap-1 justify-center bg-slate-900 py-1 rounded border border-slate-700">
+                                <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span> Belum
+                            </div>
+                        </div>
+
+                        <!-- GRID NUMBERS (1-100) -->
+                        <div id="question-grid" class="grid grid-cols-5 sm:grid-cols-10 lg:grid-cols-5 gap-2 max-h-[380px] overflow-y-auto pr-1">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <button onclick="confirmSubmitExam()" class="w-full mt-6 py-3 bg-red-600/90 hover:bg-red-600 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-red-600/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Selesaikan Ujian</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. HASIL & REKAP UJIAN VIEW -->
+            <div id="result-view" class="hidden max-w-4xl mx-auto w-full bg-slate-800 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+                <!-- PRINT HEADER ONLY -->
+                <div class="hidden print-only text-slate-900 border-b pb-4">
+                    <h1 class="text-2xl font-bold">LEMBAR HASIL UJIAN ONLINE - BASCOM AVR</h1>
+                    <p class="text-sm">Jurusan Teknik Elektronika Industri - SMK</p>
+                </div>
+
+                <div class="text-center no-print">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full mb-3 border border-emerald-500/30">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-white">Ujian Selesai!</h2>
+                    <p class="text-slate-400 text-sm mt-1">Berikut rekapitulasi hasil pengerjaan soal Anda</p>
+                </div>
+
+                <!-- CARD IDENTITAS & SKOR -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- DATA SISWA -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2 text-sm md:col-span-2">
+                        <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Identitas Siswa</h4>
+                        <div class="flex justify-between border-b border-slate-800 pb-1">
+                            <span class="text-slate-400">Nama Lengkap:</span>
+                            <span id="res-nama" class="font-bold text-white"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-800 pb-1">
+                            <span class="text-slate-400">Kelas:</span>
+                            <span id="res-kelas" class="font-bold text-white"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-800 pb-1">
+                            <span class="text-slate-400">NIS:</span>
+                            <span id="res-nis" class="font-bold text-white"></span>
+                        </div>
+                        <div class="flex justify-between pt-1">
+                            <span class="text-slate-400">Catatan Pelanggaran:</span>
+                            <span id="res-violation" class="font-bold text-amber-400">0 kali</span>
+                        </div>
+                    </div>
+
+                    <!-- SKOR UTAMA -->
+                    <div class="bg-gradient-to-br from-blue-900/50 to-indigo-900/50 p-4 rounded-xl border border-blue-500/30 flex flex-col justify-center items-center text-center">
+                        <span class="text-xs uppercase font-semibold text-blue-300">Nilai Akhir</span>
+                        <div id="res-score" class="text-5xl font-black text-white my-2">0</div>
+                        <span id="res-grade-status" class="text-xs px-3 py-1 rounded-full font-bold">--</span>
+                    </div>
+                </div>
+
+                <!-- METRIK SOAL -->
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-emerald-950/40 border border-emerald-700/50 p-3 rounded-xl">
+                        <span class="text-xs text-emerald-400 font-semibold block">Jawaban Benar</span>
+                        <span id="res-correct" class="text-2xl font-bold text-emerald-300">0</span>
+                    </div>
+                    <div class="bg-red-950/40 border border-red-700/50 p-3 rounded-xl">
+                        <span class="text-xs text-red-400 font-semibold block">Jawaban Salah</span>
+                        <span id="res-wrong" class="text-2xl font-bold text-red-300">0</span>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl">
+                        <span class="text-xs text-slate-400 font-semibold block">Tidak Dijawab</span>
+                        <span id="res-empty" class="text-2xl font-bold text-slate-300">0</span>
+                    </div>
+                </div>
+
+                <!-- METODE SETOR KE GURU -->
+                <div class="bg-slate-900/90 border border-slate-700 p-4 rounded-xl space-y-3 no-print">
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Setor Hasil Ujian ke Guru
+                    </h4>
+                    <p class="text-xs text-slate-400">Pilih salah satu metode di bawah ini untuk mengirimkan laporan nilai Anda ke Guru:</p>
+                    <div class="space-y-2">
+                        <textarea id="verification-hash" readonly rows="4" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg p-3 w-full font-mono select-all focus:outline-none resize-none"></textarea>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="copyFormattedResult()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition shadow-md shadow-blue-600/20">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                <span>Salin Teks Hasil Ujian</span>
+                            </button>
+                            <button onclick="sendToWhatsApp()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-1.157 4.228 4.228-1.157z"/></svg>
+                                <span>Kirim via WhatsApp</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="flex flex-col sm:flex-row gap-3 no-print pt-2">
+                    <button onclick="handlePrint()" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <span>Cetak / Simpan PDF</span>
+                    </button>
+                    <button onclick="toggleReviewSection()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span id="review-btn-text">Lihat Pembahasan Soal</span>
+                    </button>
+                </div>
+
+                <!-- REVIEW PEMBAHASAN CONTAINER -->
+                <div id="review-container" class="hidden space-y-4 pt-6 border-t border-slate-700">
+                    <h3 class="text-lg font-bold text-white">Pembahasan Detail Soal Ujian</h3>
+                    <div id="review-list" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-slate-800/60 border-t border-slate-800 py-3 text-center text-xs text-slate-400 no-print">
+            Aplikasi Ujian Online Teknik Elektronika Industri &copy; Pemrograman ATMega8535 (BASCOM-AVR)
+        </footer>
+    </div>
+
+    <!-- MODAL DIALOG (Custom Alert / Confirm Replacement) -->
+    <div id="modal-overlay" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 id="modal-title" class="text-lg font-bold text-white">Konfirmasi</h3>
+            <p id="modal-msg" class="text-sm text-slate-300 leading-relaxed"></p>
+            <div class="flex justify-end gap-3 pt-2">
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold text-xs rounded-lg">Batal</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-lg">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT APPLICATION LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. 100 SOAL LENGKAP PEMROGRAMAN ATMEGA8535 DENGAN BASCOM-AVR
+           ========================================================================== */
+        const rawQuestions = [
+            // BASIC & HARDWARE BASICS (1-15)
+            {
+                q: 'Direktif BASCOM-AVR yang digunakan untuk menentukan jenis mikrokontroler AVR yang dipakai adalah...',
+                code: '$regfile = "m8535.dat"',
+                opts: ['$regfile', '$crystal', '$baud', '$include', 'Config Micro'],
+                ans: 0,
+                exp: '$regfile mendefinisikan file dat yang memuat konfigurasi register target mikrokontroler (m8535.dat).'
+            },
+            {
+                q: 'Direktif BASCOM-AVR untuk menentukan frekuensi kristal pewaktu (clock crystal) sebesar 12 MHz adalah...',
+                code: '',
+                opts: ['$crystal = 12000000', '$crystal = 12Mhz', '$clock = 12000000', 'Config Crystal = 12000', '$freq = 12000000'],
+                ans: 0,
+                exp: '$crystal diisi dengan angka frekuensi dalam satuan Hertz (12 MHz = 12.000.000 Hz).'
+            },
+            {
+                q: 'Mikrokontroler ATMega8535 memiliki berapa total pin I/O fisik pada kemasan DIP (Dual Inline Package)?',
+                code: '',
+                opts: ['40 Pin', '32 Pin', '28 Pin', '44 Pin', '52 Pin'],
+                ans: 0,
+                exp: 'ATMega8535 kemasan DIP memiliki total 40 pin, di mana 32 pin berfungsi sebagai Port I/O (Port A, B, C, D).'
+            },
+            {
+                q: 'Berapakah jumlah Port I/O paralel 8-bit yang terdapat pada IC ATMega8535?',
+                code: '',
+                opts: ['4 Port (Port A, B, C, D)', '2 Port (Port A, B)', '3 Port (Port A, B, C)', '5 Port (Port A, B, C, D, E)', '1 Port (Port A)'],
+                ans: 0,
+                exp: 'ATMega8535 memiliki 4 Port 8-bit yaitu Port A, Port B, Port C, dan Port D.'
+            },
+            {
+                q: 'Tipe data dalam BASCOM-AVR yang dapat menyimpan angka bulat dari 0 hingga 255 (8-bit tak bertanda) adalah...',
+                code: '',
+                opts: ['Byte', 'Integer', 'Word', 'Long', 'Bit'],
+                ans: 0,
+                exp: 'Tipe data Byte berukuran 8 bit dan menyimpan nilai dari 0 hingga 255.'
+            },
+            {
+                q: 'Tipe data BASCOM-AVR yang digunakan untuk menyimpan nilai logika 0 atau 1 (True/False) adalah...',
+                code: '',
+                opts: ['Bit', 'Byte', 'Boolean', 'Integer', 'String'],
+                ans: 0,
+                exp: 'Bit hanya memiliki kapasitas 1 bit (nilai 0 atau 1).'
+            },
+            {
+                q: 'Tipe data Word pada BASCOM-AVR berukuran 16-bit (tanpa tanda). Jangkauan nilainya adalah...',
+                code: '',
+                opts: ['0 hingga 65.535', '0 hingga 255', '-32.768 hingga +32.767', '0 hingga 1.023', '-128 hingga +127'],
+                ans: 0,
+                exp: 'Word berukuran 16-bit unsigned (2^16 - 1 = 65535).'
+            },
+            {
+                q: 'Sintaks deklarasi variabel bernama \'Kecepatan\' bertipe data Integer yang benar dalam BASCOM-AVR adalah...',
+                code: '',
+                opts: ['Dim Kecepatan As Integer', 'Integer Kecepatan', 'Var Kecepatan : Integer', 'Define Kecepatan As Integer', 'Kecepatan As Integer'],
+                ans: 0,
+                exp: 'Deklarasi variabel pada BASCOM-AVR diawali perintah \'Dim\' diikuti nama variabel \'As\' jenis tipe data.'
+            },
+            {
+                q: 'Register internal AVR yang berfungsi untuk mengatur arah data (Input atau Output) pada Port B adalah...',
+                code: '',
+                opts: ['DDRB', 'PORTB', 'PINB', 'CTRLB', 'MODEB'],
+                ans: 0,
+                exp: 'DDR (Data Direction Register) mengatur arah pin. DDRB = 255 membuat seluruh Port B sebagai Output.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR yang digunakan untuk mengonfigurasi Port C sebagai saluran KELUARAN (Output) adalah...',
+                code: '',
+                opts: ['Config Portc = Output', 'Config Portc = Input', 'Set Portc.Output', 'DdrC = 0', 'Config PinC = Output'],
+                ans: 0,
+                exp: '\'Config Portc = Output\' secara otomatis mengatur DDRC menjadi &HFF (255).'
+            },
+            {
+                q: 'Perintah BASCOM-AVR yang digunakan untuk membaca status logika fisik pada pin input Port D bit ke-0 adalah...',
+                code: '',
+                opts: ['Pind.0', 'Portd.0', 'Ddrd.0', 'Inputd.0', 'Read.Portd.0'],
+                ans: 0,
+                exp: 'Untuk membaca masukan fisik (Input) digunakan register PINx (misal Pind.0).'
+            },
+            {
+                q: 'Apabila Port A dikonfigurasi sebagai Input, cara mengaktifkan Resistor Pull-Up internal pada Port A bit 0 adalah...',
+                code: 'Config Porta.0 = Input\n...',
+                opts: ['Set Porta.0', 'Reset Porta.0', 'Set Pina.0', 'Config Porta.0 = Pullup', 'Enable Pullup Porta.0'],
+                ans: 0,
+                exp: 'Memberi nilai 1 (Set) pada register PORT saat status pin dikonfigurasi sebagai Input akan mengaktifkan internal pull-up.'
+            },
+            {
+                q: 'Perintah penundaan (delay) waktu selama 2,5 detik pada BASCOM-AVR yang tepat adalah...',
+                code: '',
+                opts: ['Waitms 2500', 'Wait 2.5s', 'Delay 2500', 'Waitus 2500', 'Sleep 2500'],
+                ans: 0,
+                exp: 'Waitms menggunakan milidetik (2500 ms = 2,5 detik). Perintah \'Wait 2\' hanya menerima bilangan bulat detik.'
+            },
+            {
+                q: 'Sintaks penundaan waktu mikrosikon (microseconds) selama 100 µs dalam BASCOM-AVR adalah...',
+                code: '',
+                opts: ['Waitus 100', 'Waitms 100', 'Wait 100us', 'Delayus 100', 'Microwait 100'],
+                ans: 0,
+                exp: 'Waitus adalah sintaks BASCOM-AVR untuk delay dalam orde mikrodetik.'
+            },
+            {
+                q: 'Pin manakah pada ATMega8535 yang bertindak sebagai pasokan tegangan positif VCC utama (+5V)?',
+                code: '',
+                opts: ['Pin 10', 'Pin 11', 'Pin 30', 'Pin 9', 'Pin 40'],
+                ans: 0,
+                exp: 'Pada ATMega8535 kemasan DIP40, Pin 10 adalah VCC dan Pin 11 adalah GND.'
+            },
+
+            // I/O CONTROL & LOGIC STRUCTURE (16-35)
+            {
+                q: 'Perhatikan potongan kode BASCOM-AVR berikut. Apa yang terjadi pada Port B?',
+                code: 'Config Portb = Output\nPortb = &HFF',
+                opts: ['Seluruh pin Port B bernilai logika HIGH (1)', 'Seluruh pin Port B bernilai logika LOW (0)', 'Hanya pin PB0 yang menyala', 'Port B berubah menjadi Input', 'Port B mengalami short circuit'],
+                ans: 0,
+                exp: '&HFF adalah nilai heksadesimal dari 11111111 biner, sehingga seluruh pin Port B bernilai HIGH (5V).'
+            },
+            {
+                q: 'Sintaks untuk memadamkan LED yang terhubung pada Port C bit 3 dengan kondisi aktif HIGH adalah...',
+                code: '',
+                opts: ['Reset Portc.3', 'Set Portc.3', 'Low Portc.3', 'Portc.3 = 1', 'Clear Pinc.3'],
+                ans: 0,
+                exp: '\'Reset\' membuat status bit menjadi 0 (LOW), sehingga LED aktif High akan padam.'
+            },
+            {
+                q: 'Sintaks untuk menyalakan LED yang terhubung pada Port C bit 2 dengan kondisi aktif HIGH adalah...',
+                code: '',
+                opts: ['Set Portc.2', 'Reset Portc.2', 'High Portc.2', 'Portc.2 = 0', 'Toggle Portc.2'],
+                ans: 0,
+                exp: '\'Set\' memberikan logika 1 (HIGH / 5V) pada bit register tersebut.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR yang berfungsi untuk membalikkan kondisi logika suatu pin (dari HIGH ke LOW atau sebaliknya) adalah...',
+                code: '',
+                opts: ['Toggle', 'Invert', 'Reverse', 'Swap', 'Flip'],
+                ans: 0,
+                exp: 'Perintah \'Toggle Portx.y\' membalikkan status logika bit tersebut.'
+            },
+            {
+                q: 'Struktur logika keputusan (Conditional Branching) yang benar pada BASCOM-AVR adalah...',
+                code: '',
+                opts: ['If Pind.0 = 0 Then\n  Set Portb.0\nEnd If', 'If (Pind.0 == 0) {\n  Portb.0 = 1;\n}', 'If Pind.0 = 0 Do\n  Set Portb.0\nEnd', 'If Pind.0 = 0 Then Set Portb.0', 'If Pind.0 = 0 Begin\n  Set Portb.0\nEnd'],
+                ans: 0,
+                exp: 'Struktur blok If pada BASCOM-AVR diakhiri dengan \'End If\' dan menggunakan \'Then\'.'
+            },
+            {
+                q: 'Operasi logika Bitwise AND antara nilai &H0F dan &HF0 menghasilkan nilai...',
+                code: '',
+                opts: ['&H00', '&HFF', '&HF0', '&H0F', '&HA5'],
+                ans: 0,
+                exp: '00001111 AND 11110000 = 00000000 (&H00).'
+            },
+            {
+                q: 'Struktur perulangan (looping) yang melakukan perulangan dengan jumlah hitungan pasti (misal 1 sampai 10) adalah...',
+                code: '',
+                opts: ['For...Next', 'Do...Loop', 'While...Wend', 'Select Case', 'Repeat...Until'],
+                ans: 0,
+                exp: '\'For I = 1 To 10 ... Next\' adalah struktur perulangan terhitung pada BASCOM.'
+            },
+            {
+                q: 'Perhatikan perulangan berikut. Berapa kali kata \'SMK\' dicetak ke serial?',
+                code: 'For I = 2 To 10 Step 2\n  Print "SMK"\nNext I',
+                opts: ['5 kali', '10 kali', '4 kali', '8 kali', '9 kali'],
+                ans: 0,
+                exp: 'Nilai I bergerak dari 2, 4, 6, 8, 10 (total 5 perulangan).'
+            },
+            {
+                q: 'Struktur perulangan tak berhingga (infinite loop) yang paling umum digunakan pada program utama BASCOM-AVR adalah...',
+                code: '',
+                opts: ['Do ... Loop', 'For ... Next', 'While ... End', 'Loop ... Until', 'Main ... End Main'],
+                ans: 0,
+                exp: 'Blok \'Do\' dan \'Loop\' tanpa kondisi membuat program berjalan terus menerus.'
+            },
+            {
+                q: 'Perintah untuk keluar secara paksa dari sebuah blok perulangan \'Do...Loop\' sebelum kondisinya selesai adalah...',
+                code: '',
+                opts: ['Exit Do', 'Break', 'Stop', 'End Loop', 'Goto End'],
+                ans: 0,
+                exp: 'BASCOM-AVR menggunakan perintah \'Exit Do\' atau \'Exit For\' untuk menghentikan loop.'
+            },
+            {
+                q: 'Struktur kontrol percabangan multipel yang lebih efisien daripada If-Then berbertingkat banyak adalah...',
+                code: '',
+                opts: ['Select Case ... End Select', 'Switch ... Case', 'If Else Multi', 'Branch Case', 'Do Case'],
+                ans: 0,
+                exp: '\'Select Case\' digunakan untuk mengevaluasi variabel dengan banyak pilihan kondisi.'
+            },
+            {
+                q: 'Operator logika yang menghasilkan nilai TRUE hanya jika kedua syarat bernilai TRUE adalah...',
+                code: '',
+                opts: ['And', 'Or', 'Xor', 'Not', 'Nand'],
+                ans: 0,
+                exp: 'Operator AND memerlukan seluruh kondisi bernilai benar.'
+            },
+            {
+                q: 'Operator logika yang menghasilkan nilai TRUE jika salah satu atau kedua syarat bernilai TRUE adalah...',
+                code: '',
+                opts: ['Or', 'And', 'Xor', 'Not', 'Nor'],
+                ans: 0,
+                exp: 'Operator OR bernilai True selama minimal ada satu kondisi True.'
+            },
+            {
+                q: 'Operator XOR (Exclusive OR) akan menghasilkan nilai 1 (TRUE) jika...',
+                code: '',
+                opts: ['Kedua input memiliki nilai logika yang berbeda', 'Kedua input bernilai 1', 'Kedua input bernilai 0', 'Input A bernilai 0', 'Input B bernilai 0'],
+                ans: 0,
+                exp: 'XOR menghasilkan True jika kedua input saling berbeda (1-0 atau 0-1).'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk menggeser bit ke kiri (Shift Left) pada variabel \'Data1\' sebanyak 2 bit adalah...',
+                code: '',
+                opts: ['Shift Data1 , Left , 2', 'Shiftleft Data1, 2', 'Data1 = Data1 << 2', 'Rotate Data1 , Left , 2', 'Move Data1 , Left , 2'],
+                ans: 0,
+                exp: 'Format sintaks BASCOM: \'Shift var , Left/Right , count\'.'
+            },
+            {
+                q: 'Pin RESET fisik pada mikrokontroler ATMega8535 terletak pada pin nomor...',
+                code: '',
+                opts: ['Pin 9', 'Pin 1', 'Pin 10', 'Pin 40', 'Pin 20'],
+                ans: 0,
+                exp: 'Pin 9 pada ATMega8535 DIP40 adalah pin RESET (Active LOW).'
+            },
+            {
+                q: 'Tegangan kerja standar VCC untuk Mikrokontroler ATMega8535 versi standar adalah...',
+                code: '',
+                opts: ['4.5V - 5.5V DC', '12V DC', '3.3V AC', '9V - 15V DC', '1.8V DC'],
+                ans: 0,
+                exp: 'ATMega8535 standar bekerja pada tegangan 5V DC (4.5V hingga 5.5V).'
+            },
+            {
+                q: 'Pin manakah yang digunakan sebagai sumber masukan Clock Kristal eksternal (XTAL1 dan XTAL2)?',
+                code: '',
+                opts: ['Pin 12 dan Pin 13', 'Pin 9 dan Pin 10', 'Pin 40 dan Pin 39', 'Pin 30 dan Pin 31', 'Pin 1 dan Pin 2'],
+                ans: 0,
+                exp: 'Pin 12 (XTAL2) dan Pin 13 (XTAL1) digunakan untuk menghubungkan Kristal Kuarsa eksternal.'
+            },
+            {
+                q: 'Besar memori Flash Program (penyimpanan koding) pada ATMega8535 adalah...',
+                code: '',
+                opts: ['8 Kbytes', '512 Bytes', '1 Kbyte', '16 Kbytes', '32 Kbytes'],
+                ans: 0,
+                exp: 'Nama ATMega8535 menunjukkan kapasitas Flash memory 8 KB (8192 Byte).'
+            },
+            {
+                q: 'Kapasitas memori SRAM internal pada ATMega8535 adalah...',
+                code: '',
+                opts: ['512 Bytes', '1 Kbyte', '8 Kbytes', '256 Bytes', '2 Kbytes'],
+                ans: 0,
+                exp: 'ATMega8535 memiliki SRAM sebesar 512 Byte untuk memori variabel sementara.'
+            },
+
+            // LCD DISPLAY INTERFACING (36-50)
+            {
+                q: 'Direktif BASCOM-AVR untuk mengonfigurasi jenis LCD karakter 16 kolom x 2 baris adalah...',
+                code: '',
+                opts: ['Config Lcd = 16 * 2', 'Config Display = 16x2', 'Init Lcd 162', 'Set Lcd = 162', 'Define Lcd = 16*2'],
+                ans: 0,
+                exp: 'Sintaks resmi BASCOM-AVR: \'Config Lcd = 16 * 2\'.'
+            },
+            {
+                q: 'Sintaks pengkonfigurasian pin data LCD (DB4-DB7) dan pin kontrol (RS, E) pada Port C dalam BASCOM-AVR adalah...',
+                code: '',
+                opts: ['Config Lcdpin = Pin , Db4 = Portc.4 , Db5 = Portc.5 , Db6 = Portc.6 , Db7 = Portc.7 , E = Portc.3 , Rs = Portc.2', 'Config Pin Lcd = Portc', 'Set Lcdpin = Portc.0', 'Config Lcd_Port = Portc', 'Define Lcd_Pins Portc'],
+                ans: 0,
+                exp: 'Format konfigurasi LCD 4-bit menggunakan perintah \'Config Lcdpin = Pin , ...\'.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk membersihkan seluruh tampilan layar LCD dan mengembalikan kursor ke pojok kiri atas adalah...',
+                code: '',
+                opts: ['Cls', 'Clear Lcd', 'Reset Lcd', 'Lcd_Clear', 'Clean'],
+                ans: 0,
+                exp: '\'Cls\' singkatan dari Clear Screen.'
+            },
+            {
+                q: 'Perintah untuk memindahkan posisi kursor LCD ke Baris ke-2, Kolom ke-5 adalah...',
+                code: '',
+                opts: ['Locate 2 , 5', 'Cursor 5 , 2', 'Locate 5 , 2', 'Set Cursor 2 , 5', 'GotoXY 5 , 2'],
+                ans: 0,
+                exp: 'Perintah \'Locate Baris , Kolom\' (Locate row, col).'
+            },
+            {
+                q: 'Sintaks untuk menampilkan tulisan \'TEKNIK ELEKTRONIKA\' pada layar LCD adalah...',
+                code: '',
+                opts: ['Lcd "TEKNIK ELEKTRONIKA"', 'Print Lcd "TEKNIK ELEKTRONIKA"', 'Write Lcd("TEKNIK ELEKTRONIKA")', 'Display "TEKNIK ELEKTRONIKA"', 'Out Lcd , "TEKNIK ELEKTRONIKA"'],
+                ans: 0,
+                exp: 'Perintah Lcd "text" digunakan untuk mencetak string ke layar LCD.'
+            },
+            {
+                q: 'Perintah singkat untuk memindahkan kursor LCD langsung ke awal Baris Kedua tanpa Locate adalah...',
+                code: '',
+                opts: ['Lowerline', 'Newline', 'Line 2', 'Secondline', 'Downline'],
+                ans: 0,
+                exp: '\'Lowerline\' mengarahkan kursor ke baris 2 kolom 1.'
+            },
+            {
+                q: 'Perintah singkat untuk memindahkan kursor LCD kembali ke awal Baris Pertama adalah...',
+                code: '',
+                opts: ['Thirdline', 'Upperline', 'Home', 'Topline', 'Firstline'],
+                ans: 0,
+                exp: '\'Thirdline\' atau \'Home\' (atau Locate 1,1) mengembalikan kursor ke baris paling atas.'
+            },
+            {
+                q: 'Perintah untuk mematikan tampilan kursor (cursor off) agar tidak berkedip di LCD adalah...',
+                code: '',
+                opts: ['Cursor Off', 'Lcd Cursor 0', 'Hide Cursor', 'No Cursor', 'Config Cursor = Off'],
+                ans: 0,
+                exp: 'Perintah \'Cursor Off\' menyembunyikan kursor pada layar LCD.'
+            },
+            {
+                q: 'Perintah \'Cursor Blink\' pada komunikasi LCD berfungsi untuk...',
+                code: '',
+                opts: ['Kedip-kedipkan kursor berupa blok hitam', 'Mematikan layar LCD', 'Membersihkan teks LCD', 'Menggeser teks ke kiri', 'Menampilkan karakter khusus'],
+                ans: 0,
+                exp: '\'Cursor Blink\' membuat kursor berkedip sebagai penanda lokasi mengetik.'
+            },
+            {
+                q: 'Pin LCD manakah yang dihubungkan ke Potensiosimeter untuk mengatur tingkat kontras karakter?',
+                code: '',
+                opts: ['Pin VEE / V0 (Pin 3)', 'Pin VCC (Pin 2)', 'Pin GND (Pin 1)', 'Pin RS (Pin 4)', 'Pin RW (Pin 5)'],
+                ans: 0,
+                exp: 'Pin 3 (VEE/V0) pada modul LCD 16x2 berfungsi mengatur kontras tampilan karakter.'
+            },
+            {
+                q: 'Jika pin R/W (Read/Write) pada modul LCD dihubungkan langsung ke GND, maka modul LCD bekerja pada mode...',
+                code: '',
+                opts: ['Write Only (Hanya Menulis)', 'Read Only (Hanya Membaca)', 'Busy Check Only', 'High Impedance', 'Disabled'],
+                ans: 0,
+                exp: 'Logika LOW (GND) pada pin R/W menentukan mode penulisan (Write) dari Mikrokontroler ke LCD.'
+            },
+            {
+                q: 'Sintaks untuk menampilkan nilai dari variabel angka \'Suhu\' ke LCD yang benar adalah...',
+                code: 'Dim Suhu As Byte\nSuhu = 35',
+                opts: ['Lcd Suhu', 'Lcd "Suhu"', 'Print Suhu', 'Display Suhu', 'Out Lcd , Suhu'],
+                ans: 0,
+                exp: 'Tanpa tanda petik, \'Lcd Suhu\' mencetak nilai isi variabel (yaitu 35).'
+            },
+            {
+                q: 'Apa fungsi dari perintah \'Display Off\' pada BASCOM-AVR?',
+                code: '',
+                opts: ['Mematikan tampilan teks LCD tanpa menghapus memori DDRAM', 'Menghapus seluruh isi LCD', 'Mematikan daya listrik ke LCD secara total', 'Mematikan lampu backlight LCD', 'Mengunci tombol kontrol LCD'],
+                ans: 0,
+                exp: '\'Display Off\' menyembunyikan tampilan tanpa menghapus data karakter yang sudah ada.'
+            },
+            {
+                q: 'Untuk menampilkan karakter kustom/simbol khusus pada LCD, memori internal LCD yang digunakan adalah...',
+                code: '',
+                opts: ['CGRAM (Character Generator RAM)', 'DDRAM (Display Data RAM)', 'CGROM', 'SRAM', 'EEPROM'],
+                ans: 0,
+                exp: 'CGRAM digunakan untuk menyimpan bentukan pola karakter kustom buatan pengguna.'
+            },
+            {
+                q: 'Berapa jumlah pin data minimal yang digunakan pada pengkabelan LCD mode 4-bit?',
+                code: '',
+                opts: ['4 Pin Data (DB4, DB5, DB6, DB7)', '8 Pin Data (DB0-DB7)', '2 Pin Data (SDA, SCL)', '6 Pin Data', '1 Pin Data'],
+                ans: 0,
+                exp: 'Mode 4-bit hanya menggunakan 4 jalur data paling atas yaitu DB4 sampai DB7.'
+            },
+
+            // INTERRUPT SYSTEM (51-65)
+            {
+                q: 'Berapa jumlah saluran Interupsi Eksternal hardware yang dimiliki oleh ATMega8535?',
+                code: '',
+                opts: ['3 Saluran (INT0, INT1, INT2)', '2 Saluran (INT0, INT1)', '4 Saluran', '8 Saluran', '1 Saluran'],
+                ans: 0,
+                exp: 'ATMega8535 memiliki 3 pin Interupsi Eksternal: INT0 (PD2), INT1 (PD3), dan INT2 (PB2).'
+            },
+            {
+                q: 'Pin fisik ATMega8535 yang memiliki fungsi ganda sebagai Interupsi Eksternal 0 (INT0) adalah...',
+                code: '',
+                opts: ['Port D bit 2 (PD2 / Pin 16)', 'Port D bit 3 (PD3 / Pin 17)', 'Port B bit 2 (PB2 / Pin 3)', 'Port A bit 0 (PA0)', 'Port C bit 0 (PC0)'],
+                ans: 0,
+                exp: 'INT0 terletak pada pin Port D.2 (Pin 16 pada DIP40).'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk mengaktifkan sistem interupsi secara global (Global Interrupt Enable) adalah...',
+                code: '',
+                opts: ['Enable Interrupts', 'Start Interrupts', 'On Interrupts', 'Set GICR', 'Sei()'],
+                ans: 0,
+                exp: '\'Enable Interrupts\' mengaktifkan bit I pada register SREG secara global.'
+            },
+            {
+                q: 'Sintaks untuk mengarahkan eksekusi program ke subrutin \'Layanan_Tombol\' saat terjadi Interupsi INT0 adalah...',
+                code: '',
+                opts: ['On Int0 Layanan_Tombol', 'Enable Int0 Layanan_Tombol', 'Config Int0 = Layanan_Tombol', 'Goto Int0 Layanan_Tombol', 'AttachInterrupt(0, Layanan_Tombol)'],
+                ans: 0,
+                exp: 'Sintaksnya: \'On INTx Nama_Subrutin\'.'
+            },
+            {
+                q: 'Sintaks untuk mengonfigurasi INT0 agar terpicu saat terjadi transisi tegangan dari HIGH ke LOW (Falling Edge) adalah...',
+                code: '',
+                opts: ['Config Int0 = Falling', 'Config Int0 = Low Level', 'Config Int0 = Rising', 'Config Int0 = Change', 'Set Int0.Falling'],
+                ans: 0,
+                exp: '\'Config Int0 = Falling\' memicu interupsi saat ada sinyal gelombang turun (falling edge).'
+            },
+            {
+                q: 'Konfigurasi Interupsi \'Config Int0 = Rising\' akan memicu subrutin interupsi apabila...',
+                code: '',
+                opts: ['Sinyal masukan berubah dari LOW (0V) ke HIGH (5V)', 'Sinyal masukan berubah dari HIGH ke LOW', 'Tegangan logika berada pada level 0V terus-menerus', 'Setiap kali ada perubahan status apapun', 'Tegangan dinaikkan menjadi 12V'],
+                ans: 0,
+                exp: '\'Rising\' memicu pemicuan interupsi pada tepi naik (0V menuju 5V).'
+            },
+            {
+                q: 'Subrutin penangan interupsi (Interrupt Service Routine / ISR) dalam BASCOM-AVR harus diakhiri dengan perintah...',
+                code: 'Layanan_Tombol:\n  Toggle Portb.0\n  ...',
+                opts: ['Return', 'End Sub', 'Exit Interrupt', 'Resume', 'Pop'],
+                ans: 0,
+                exp: 'Subrutin interupsi yang dipanggil dengan perintah \'On Intx\' diakhiri sintaks \'Return\'.'
+            },
+            {
+                q: 'Pin fisik ATMega8535 yang bertindak sebagai Interupsi Eksternal 1 (INT1) berada pada...',
+                code: '',
+                opts: ['Port D bit 3 (PD3 / Pin 17)', 'Port D bit 2 (PD2 / Pin 16)', 'Port B bit 2 (PB2)', 'Port C bit 1', 'Port A bit 1'],
+                ans: 0,
+                exp: 'INT1 terletak pada Port D.3.'
+            },
+            {
+                q: 'Perintah untuk menonaktifkan saluran interupsi INT0 secara spesifik adalah...',
+                code: '',
+                opts: ['Disable Int0', 'Stop Int0', 'Reset Int0', 'Off Int0', 'Close Int0'],
+                ans: 0,
+                exp: '\'Disable Int0\' mematikan pemicuan interupsi INT0.'
+            },
+            {
+                q: 'Apakah yang terjadi pada program utama (Main Loop) saat terjadi sinyal interupsi?',
+                code: '',
+                opts: ['Program utama dihentikan sementara, mikrokontroler mengeksekusi ISR, lalu kembali ke program utama', 'Program utama langsung di-reset dari awal', 'Mikrokontroler mati (shutdown)', 'Program utama dan ISR berjalan bersamaan (multi-threading)', 'Semua isi RAM dihapus'],
+                ans: 0,
+                exp: 'Interupsi menyela program utama sementara untuk menjalankan ISR, lalu melanjutkan sisa instruksi utama.'
+            },
+            {
+                q: 'Register AVR yang menyimpan Flag sinyal interupsi eksternal yang terjadi adalah...',
+                code: '',
+                opts: ['GIFR (General Interrupt Flag Register)', 'MCUCR', 'GICR', 'SREG', 'TIMSK'],
+                ans: 0,
+                exp: 'GIFR menampung bendera (flag) pencetus interupsi INT0, INT1, dan INT2.'
+            },
+            {
+                q: 'Register pengontrol mode pemicuan (Falling, Rising, Low Level) untuk INT0 dan INT1 adalah...',
+                code: '',
+                opts: ['MCUCR', 'MCUCSR', 'GICR', 'TCCR0', 'SREG'],
+                ans: 0,
+                exp: 'MCUCR (MCU Control Register) mengontrol bit pemicuan ISC00, ISC01, ISC10, ISC11.'
+            },
+            {
+                q: 'Interupsi eksternal INT2 pada ATMega8535 memiliki keunikan dibanding INT0/INT1, yaitu pemicuannya hanya mendukung...',
+                code: '',
+                opts: ['Rising Edge dan Falling Edge', 'Low Level saja', 'Change level saja', 'High level saja', 'Semua mode'],
+                ans: 0,
+                exp: 'INT2 (pada PB2) hanya mendukung pemicuan Tepi Naik (Rising) atau Tepi Turun (Falling).'
+            },
+            {
+                q: 'Perintah BASCOM-AVR \'Disable Interrupts\' berfungsi untuk...',
+                code: '',
+                opts: ['Mematikan seluruh sistem interupsi secara global', 'Mematikan interupsi Timer0 saja', 'Menghapus kode program interupsi', 'Mereset mikrokontroler', 'Mematikan Clock XTAL'],
+                ans: 0,
+                exp: '\'Disable Interrupts\' mengclearkan bit Global Interrupt (I-bit) pada SREG.'
+            },
+            {
+                q: 'Mengapa variabel yang diubah di dalam ISR sebaiknya dideklarasikan dengan cermat?',
+                code: '',
+                opts: ['Agar nilainya dapat langsung diperbarui dan diakses oleh program utama', 'Agar memori Flash tidak penuh', 'Agar tidak terjadi konsleting', 'Agar timer berjalan lebih cepat', 'Agar nilai variabel selalu bernilai 0'],
+                ans: 0,
+                exp: 'Variabel interupsi harus sinkron agar perubahan nilai di ISR terbaca konsisten oleh main loop.'
+            },
+
+            // TIMERS & COUNTERS (66-80)
+            {
+                q: 'ATMega8535 dilengkapi dengan berapa unit Timer/Counter internal?',
+                code: '',
+                opts: ['3 Unit (Timer0 8-bit, Timer1 16-bit, Timer2 8-bit)', '2 Unit (Timer0 dan Timer1)', '1 Unit', '4 Unit', '8 Unit'],
+                ans: 0,
+                exp: 'Terdapat 3 Timer: Timer0 (8-bit), Timer1 (16-bit), dan Timer2 (8-bit).'
+            },
+            {
+                q: 'Berapakah nilai maksimum cacahan (overflow) pada Timer0 yang berukuran 8-bit?',
+                code: '',
+                opts: ['255 (256 langkah)', '65.535', '1.023', '127', '511'],
+                ans: 0,
+                exp: 'Timer 8-bit mencacah dari 0 hingga 2^8 - 1 = 255.'
+            },
+            {
+                q: 'Berapakah nilai maksimum cacahan (overflow) pada Timer1 yang berukuran 16-bit?',
+                code: '',
+                opts: ['65.535 (65.536 langkah)', '255', '1.023', '32.767', '99.999'],
+                ans: 0,
+                exp: 'Timer 16-bit mencacah dari 0 hingga 2^16 - 1 = 65.535.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk mengonfigurasi Timer0 sebagai pewaktu (Timer) dengan prescaler 1024 adalah...',
+                code: '',
+                opts: ['Config Timer0 = Timer , Prescale = 1024', 'Set Timer0 = 1024', 'Config Timer0 = Prescale_1024', 'Init Timer0 Prescale 1024', 'Enable Timer0 , Prescale = 1024'],
+                ans: 0,
+                exp: 'Sintaks standar: \'Config Timer0 = Timer , Prescale = 1 | 8 | 64 | 256 | 1024\'.'
+            },
+            {
+                q: 'Fungsi dari pembagi frekuensi (Prescaler) pada pengkonfigurasian Timer adalah...',
+                code: '',
+                opts: ['Memperlambat laju cacahan timer dengan membagi frekuensi clock utama', 'Meningkatkan tegangan kerja mikrokontroler', 'Mempercepat clock prosesor', 'Menambah jumlah bit timer', 'Mengubah fungsi timer menjadi ADC'],
+                ans: 0,
+                exp: 'Prescaler membagi frekuensi crystal (misal F_CPU / 1024) sehingga Timer mencacah lebih lambat dan jangkauan waktu lebih panjang.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk menjalankan/memulai hitungan Timer0 adalah...',
+                code: '',
+                opts: ['Start Timer0', 'Run Timer0', 'Enable Timer0', 'Set Timer0', 'On Timer0'],
+                ans: 0,
+                exp: '\'Start Timer0\' memulai pencacahan timer, sedangkan \'Stop Timer0\' menghentikannya.'
+            },
+            {
+                q: 'Perintah untuk mengisikan nilai awal register cacahan Timer0 sebesar 100 adalah...',
+                code: '',
+                opts: ['Timer0 = 100', 'Load Timer0 = 100', 'Set Timer0(100)', 'Preset Timer0 = 100', 'Config Timer0 = 100'],
+                ans: 0,
+                exp: 'Cukup tuliskan nama register timer \'Timer0 = 100\'.'
+            },
+            {
+                q: 'Sintaks untuk menghubungkan kejadian melimpah (Overflow) Timer0 ke subrutin \'Hitung_Detik\' adalah...',
+                code: '',
+                opts: ['On Timer0 Hitung_Detik', 'Enable Timer0 Hitung_Detik', 'Config Timer0 = Hitung_Detik', 'Attach Timer0 Hitung_Detik', 'If Timer0 Overflow Goto Hitung_Detik'],
+                ans: 0,
+                exp: 'Perintah \'On Timer0 Nama_Subrutin\' menentukan ISR saat terjadi overflow timer.'
+            },
+            {
+                q: 'Pin masukan pulsa eksternal untuk Counter0 (T0) pada ATMega8535 terletak pada...',
+                code: '',
+                opts: ['Port B bit 0 (PB0 / Pin 1)', 'Port B bit 1 (PB1)', 'Port D bit 4', 'Port C bit 0', 'Port A bit 0'],
+                ans: 0,
+                exp: 'Pin T0 (External Counter Input Timer0) berada pada PB0.'
+            },
+            {
+                q: 'Sintaks untuk mengonfigurasi Timer0 sebagai Counter pulsa eksternal pemicuan tepi turun adalah...',
+                code: '',
+                opts: ['Config Timer0 = Counter , Edge = Falling', 'Config Timer0 = External , Low', 'Config Counter0 = Input', 'Set Timer0 = Counter_Falling', 'Init Counter0 = Falling'],
+                ans: 0,
+                exp: 'Perintah: \'Config Timer0 = Counter , Edge = Falling\'.'
+            },
+            {
+                q: 'Perbedaaan utama fungsi antara mode \'Timer\' dan mode \'Counter\' pada BASCOM-AVR adalah...',
+                code: '',
+                opts: ['Timer bersumber dari clock internal, Counter bersumber dari sinyal/pulsa pin eksternal', 'Timer berukuran 16 bit, Counter 8 bit', 'Timer hanya untuk output, Counter untuk input', 'Timer tidak butuh prescaler, Counter wajib prescaler', 'Timer untuk LCD, Counter untuk Motor'],
+                ans: 0,
+                exp: 'Mode Timer menghitung pulsa internal kristal; Counter menghitung pulsa dari luar melalui pin T0/T1.'
+            },
+            {
+                q: 'Register penampung nilai cacahan langsung untuk Timer1 (16-bit) adalah...',
+                code: '',
+                opts: ['Timer1', 'TCNT1L saja', 'TCNT1H saja', 'Counter1', 'Timer1_Val'],
+                ans: 0,
+                exp: 'Di BASCOM-AVR kita dapat langsung mengakses register 16-bit dengan nama \'Timer1\'.'
+            },
+            {
+                q: 'Perintah untuk menghentikan sementara hitungan Timer1 adalah...',
+                code: '',
+                opts: ['Stop Timer1', 'Disable Timer1', 'Reset Timer1', 'Pause Timer1', 'Close Timer1'],
+                ans: 0,
+                exp: '\'Stop Timer1\' menghentikan pencacahan.'
+            },
+            {
+                q: 'Register mask yang digunakan untuk memfungsikan interupsi overflow timer (TOIE0, TOIE1, TOIE2) adalah...',
+                code: '',
+                opts: ['TIMSK', 'TIFR', 'TCCR0', 'SREG', 'MCUCR'],
+                ans: 0,
+                exp: 'TIMSK (Timer/Counter Interrupt Mask Register) mengaktifkan izin lokal interupsi timer.'
+            },
+            {
+                q: 'Jika Kristal = 8 MHz dan Prescaler = 8, maka frekuensi masukan ke Timer adalah...',
+                code: '',
+                opts: ['1 MHz', '8 MHz', '64 MHz', '500 kHz', '2 MHz'],
+                ans: 0,
+                exp: 'F_timer = F_crystal / Prescale = 8.000.000 / 8 = 1.000.000 Hz = 1 MHz.'
+            },
+
+            // ADC & ANALOG SENSORS (81-90)
+            {
+                q: 'Berapakah jumlah saluran (channel) ADC internal beresolusi 10-bit pada ATMega8535?',
+                code: '',
+                opts: ['8 Saluran (Port A.0 - Port A.7)', '4 Saluran', '10 Saluran', '16 Saluran', '2 Saluran'],
+                ans: 0,
+                exp: 'ATMega8535 memiliki 8 channel ADC ter-multiplex pada Port A (ADC0 hingga ADC7).'
+            },
+            {
+                q: 'Berapa nilai digital maksimum yang dihasilkan oleh ADC 10-bit pada ATMega8535?',
+                code: '',
+                opts: ['1023 (0 sampai 1023)', '255', '4095', '65535', '512'],
+                ans: 0,
+                exp: 'ADC 10-bit memiliki rentang 2^10 - 1 = 1023.'
+            },
+            {
+                q: 'Direktif BASCOM-AVR untuk mengonfigurasi ADC dengan referensi tegangan AVCC dan prescaler Auto adalah...',
+                code: '',
+                opts: ['Config Adc = Single , Prescaler = Auto , Reference = Avcc', 'Init Adc = Internal', 'Config Adc = Enable', 'Set Adc = 10bit', 'Config Adc = Avcc'],
+                ans: 0,
+                exp: 'Perintah standar: \'Config Adc = Single , Prescaler = Auto , Reference = Avcc\'.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk memulai mengaktifkan blok rangkaian ADC internal adalah...',
+                code: '',
+                opts: ['Start Adc', 'Enable Adc', 'Run Adc', 'Open Adc', 'On Adc'],
+                ans: 0,
+                exp: 'Harus diawali dengan \'Start Adc\' sebelum membaca data analog.'
+            },
+            {
+                q: 'Sintaks untuk membaca nilai konversi analog dari channel ADC nomor 0 dan menyimpannya ke variabel \'Data_Analog\' adalah...',
+                code: '',
+                opts: ['Data_Analog = Getadc(0)', 'Data_Analog = Readadc(0)', 'Data_Analog = Adc(0)', 'Read_Adc 0 , Data_Analog', 'Data_Analog = AnalogIn(0)'],
+                ans: 0,
+                exp: 'Perintah BASCOM-AVR: \'variabel = Getadc(channel)\'.'
+            },
+            {
+                q: 'Pin tegangan referensi analog eksternal pada ATMega8535 dinamakan pin...',
+                code: '',
+                opts: ['AREF (Pin 32)', 'AVCC (Pin 30)', 'AGND (Pin 31)', 'VCC', 'RESET'],
+                ans: 0,
+                exp: 'AREF (Analog Reference) pada Pin 32 digunakan untuk menentukan batas tegangan ukur maksimum ADC.'
+            },
+            {
+                q: 'Jika VREF ADC = 5.0 Volt dan hasil konversi Getadc(0) menunjukkan angka 512, maka estimasi tegangan analog masukannya adalah...',
+                code: '',
+                opts: ['Sekitar 2.5 Volt', 'Sekitar 5.0 Volt', 'Sekitar 1.0 Volt', 'Sekitar 0.0 Volt', 'Sekitar 3.3 Volt'],
+                ans: 0,
+                exp: 'Nilai 512 mendekati separuh dari 1023, sehingga Vin ≈ 5.0V / 2 = 2.5V.'
+            },
+            {
+                q: 'Sensor suhu LM35 memiliki kepresisian linier 10 mV/°C. Jika suhu ruangan 30°C, tegangan keluaran analog LM35 adalah...',
+                code: '',
+                opts: ['300 mV (0.3 V)', '30 mV', '3.0 V', '3000 mV', '0.03 V'],
+                ans: 0,
+                exp: 'Vout = 30°C * 10 mV/°C = 300 mV = 0.3 Volt.'
+            },
+            {
+                q: 'Perintah \'Stop Adc\' dalam BASCOM-AVR digunakan untuk...',
+                code: '',
+                opts: ['Mematikan blok ADC internal untuk menghemat konsumsi daya', 'Menghapus hasil konversi ADC', 'Mereset port A', 'Mematikan layar LCD', 'Mengubah mode ADC ke 8-bit'],
+                ans: 0,
+                exp: '\'Stop Adc\' mematikan modul ADC internal mikrokontroler.'
+            },
+            {
+                q: 'Opsi \'Reference = Internal\' pada konfigurasi ADC ATMega8535 menggunakan tegangan referensi presisi internal sebesar...',
+                code: '',
+                opts: ['2.56 Volt', '5.0 Volt', '1.1 Volt', '3.3 Volt', '12 Volt'],
+                ans: 0,
+                exp: 'ATMega8535 menyediakan tegangan referensi internal sebesar 2.56 V.'
+            },
+
+            // PWM, USART & ADVANCED TOPICS (91-100)
+            {
+                q: 'Fitur PWM (Pulse Width Modulation) pada ATMega8535 umum dimanfaatkan untuk...',
+                code: '',
+                opts: ['Mengatur kecepatan Motor DC atau kecerahan lampu LED', 'Membaca tombol keyboard', 'Menyimpan data permanen', 'Mengukur frekuensi kristal', 'Mengomunikasikan 2 mikrokontroler'],
+                ans: 0,
+                exp: 'PWM menghasilkan gelombang pulsa dengan duty cycle variabel untuk mengontrol daya motor DC/LED.'
+            },
+            {
+                q: 'Sintaks BASCOM-AVR untuk mengonfigurasi Timer1 sebagai pembangkit PWM 8-bit non-inverting adalah...',
+                code: '',
+                opts: ['Config Timer1 = Pwm , Pwm = 8 , Compare A Pwm = Clear Down', 'Config Pwm1 = On', 'Set Timer1 = Pwm_8bit', 'Enable Pwm1a', 'Config Timer1 = Mode_Pwm'],
+                ans: 0,
+                exp: 'Perintah resmi: \'Config Timer1 = Pwm , Pwm = 8 | 9 | 10 , Compare A Pwm = Clear Down\'.'
+            },
+            {
+                q: 'Pin fisik tempat keluaran gelombang PWM dari Channel A Timer1 (OC1A) pada ATMega8535 adalah...',
+                code: '',
+                opts: ['Port D bit 5 (PD5 / Pin 19)', 'Port D bit 4 (PD4)', 'Port B bit 3 (PB3)', 'Port C bit 5', 'Port A bit 5'],
+                ans: 0,
+                exp: 'OC1A terletak pada Pin PD5, sedangkan OC1B pada PD4.'
+            },
+            {
+                q: 'Sintaks untuk memberikan nilai Duty Cycle sebesar 50% (nilai 128 pada PWM 8-bit) ke PWM1A adalah...',
+                code: '',
+                opts: ['Pwm1a = 128', 'Set Pwm1a(128)', 'Compare1a = 128', 'Out Pwm1a = 128', 'Duty Pwm1a = 50'],
+                ans: 0,
+                exp: 'Cukup mengisikan variabel register \'Pwm1a = 128\'.'
+            },
+            {
+                q: 'Direktif BASCOM-AVR untuk menentukan kecepatan baudrate komunikasi serial USART sebesar 9600 bps adalah...',
+                code: '',
+                opts: ['$baud = 9600', 'Config Baud = 9600', 'Set Serial 9600', 'Baudrate = 9600', 'Init Serial = 9600'],
+                ans: 0,
+                exp: 'Direktif \'$baud = 9600\' mengonfigurasi register UBRR USART.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk mengirimkan teks \'Hello SMK\' melalui serial USART ke Komputer/Bluetooth adalah...',
+                code: '',
+                opts: ['Print "Hello SMK"', 'Transmit "Hello SMK"', 'SerialSend "Hello SMK"', 'Out Serial , "Hello SMK"', 'Write "Hello SMK"'],
+                ans: 0,
+                exp: 'Perintah \'Print\' secara otomatis mengirimkan data string melalui pin TXD (PD1).'
+            },
+            {
+                q: 'Pin fisik ATMega8535 yang berfungsi sebagai saluran penerima data serial (RXD) dan pengirim data (TXD) adalah...',
+                code: '',
+                opts: ['RXD pada PD0 (Pin 14) dan TXD pada PD1 (Pin 15)', 'RXD pada PB0 dan TXD pada PB1', 'RXD pada PC0 dan TXD pada PC1', 'RXD pada PA0 dan TXD pada PA1', 'RXD pada PD2 dan TXD pada PD3'],
+                ans: 0,
+                exp: 'Communication USART AVR: PD0 = RXD, PD1 = TXD.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk membaca satu karakter yang masuk dari komunikasi serial tanpa menghentikan (non-blocking) program adalah...',
+                code: '',
+                opts: ['Inkey()', 'Input', 'Readserial', 'Getbyte', 'Receive()'],
+                ans: 0,
+                exp: '\'Inkey()\' mengembalikan nilai ASCII karakter yang masuk jika ada, atau 0 jika tidak ada.'
+            },
+            {
+                q: 'Perintah untuk menyimpan nilai variabel \'Skor\' ke dalam memori non-volatile EEPROM internal ATMega8535 adalah...',
+                code: '',
+                opts: ['Writeeeprom Skor , Eeprom_Address', 'Save Skor To Eeprom', 'Eeprom_Write(Skor)', 'Put Eeprom , Skor', 'Store Skor'],
+                ans: 0,
+                exp: 'Sintaks BASCOM: \'Writeeeprom var , address\'.'
+            },
+            {
+                q: 'Perintah BASCOM-AVR untuk membaca data dari EEPROM internal lokasi alamat tertentu ke variabel adalah...',
+                code: '',
+                opts: ['Readeeprom Skor , Eeprom_Address', 'Load Eeprom Skor', 'Eeprom_Read(Skor)', 'Get Eeprom , Skor', 'Fetch Eeprom'],
+                ans: 0,
+                exp: 'Sintaks BASCOM: \'Readeeprom var , address\'.'
+            }
+        ];
+
+        /* ==========================================================================
+           2. GLOBAL APP STATE & VARIABLES
+           ========================================================================== */
+        let studentInfo = { nama: "", kelas: "", nis: "" };
+        let questions = []; // Shuffled questions & options
+        let userAnswers = new Array(100).fill(null); // stores selected option index
+        let userFlags = new Array(100).fill(false); // flagged questions
+        let currentQuestionIdx = 0;
+        let examTimeSeconds = 90 * 60; // 90 minutes
+        let timerInterval = null;
+        let violationCount = 0;
+        let isExamFinished = false;
+
+        /* ==========================================================================
+           3. SHUFFLE HELPER (FISHER-YATES)
+           ========================================================================== */
+        function shuffleArray(arr) {
+            const array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function prepareExamQuestions() {
+            // Clone & Shuffle Questions
+            const shuffledQ = shuffleArray(rawQuestions);
+            
+            return shuffledQ.map((qObj) => {
+                // Map original options with correct index tracking
+                const originalOptions = qObj.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === qObj.ans
+                }));
+                
+                // Shuffle options
+                const shuffledOpts = shuffleArray(originalOptions);
+                const newCorrectIdx = shuffledOpts.findIndex(o => o.isCorrect);
+
+                return {
+                    q: qObj.q,
+                    code: qObj.code || "",
+                    opts: shuffledOpts.map(o => o.text),
+                    ans: newCorrectIdx,
+                    exp: qObj.exp
+                };
+            });
+        }
+
+        /* ==========================================================================
+           4. EVENT LISTENERS & ANTI CHEATING SYSTEM
+           ========================================================================== */
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            studentInfo.nama = document.getElementById('input-nama').value.trim();
+            studentInfo.kelas = document.getElementById('input-kelas').value.trim();
+            studentInfo.nis = document.getElementById('input-nis').value.trim();
+
+            if (!studentInfo.nama || !studentInfo.kelas || !studentInfo.nis) {
+                showModal("Perhatian", "Harap isi semua kolom identitas peserta ujian.");
+                return;
+            }
+
+            showModal("Konfirmasi Mulai Ujian", "Ujian akan dimulai dengan durasi 90 menit. Layar akan dikunci dalam mode Fullscreen dan fitur anti-nyontek akan aktif. Siap mengerjakan?", () => {
+                startExam();
+            });
+        });
+
+        function setupAntiCheating() {
+            // 1. Tab / Window Blur Detection
+            window.addEventListener('blur', recordViolation);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) recordViolation();
+            });
+
+            // 2. Prevent Copy Cut Paste Context Menu (hanya saat ujian berlangsung)
+            document.addEventListener('copy', (e) => { if (!isExamFinished) e.preventDefault(); });
+            document.addEventListener('cut', (e) => { if (!isExamFinished) e.preventDefault(); });
+            document.addEventListener('paste', (e) => { if (!isExamFinished) e.preventDefault(); });
+            document.addEventListener('contextmenu', (e) => { if (!isExamFinished) e.preventDefault(); });
+
+            // 3. Block Shortcuts (F12, Ctrl+C, Ctrl+V, Ctrl+U, Ctrl+Shift+I)
+            document.addEventListener('keydown', (e) => {
+                if (isExamFinished) return;
+                if (
+                    e.key === 'F12' ||
+                    (e.ctrlKey && ['c', 'v', 'u', 's', 'p'].includes(e.key.toLowerCase())) ||
+                    (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase()))
+                ) {
+                    e.preventDefault();
+                    recordViolation();
+                }
+            });
+        }
+
+        function recordViolation() {
+            if (isExamFinished) return;
+            violationCount++;
+            document.getElementById('violation-count').innerText = violationCount;
+
+            showModal("PERINGATAN KEAMANAN (ANTI-NYONTEK)", 
+                `Terdeteksi aktivitas mencurigakan / berpindah jendela (${violationCount} kali)! Pelanggaran ini dicatat dalam laporan guru.`,
+                null, true);
+        }
+
+        function requestFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            }
+        }
+
+        /* ==========================================================================
+           5. EXAM ENGINE LOGIC
+           ========================================================================== */
+        function startExam() {
+            questions = prepareExamQuestions();
+            setupAntiCheating();
+            requestFullscreen();
+
+            // Switch Views
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('exam-view').classList.remove('hidden');
+            document.getElementById('top-exam-status').classList.remove('hidden');
+
+            renderGridNav();
+            renderQuestion(0);
+            startTimer();
+        }
+
+        function startTimer() {
+            const timerEl = document.getElementById('timer-display');
+            timerInterval = setInterval(() => {
+                examTimeSeconds--;
+                const mins = Math.floor(examTimeSeconds / 60);
+                const secs = examTimeSeconds % 60;
+                timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (examTimeSeconds <= 600) {
+                    timerEl.classList.add('text-red-400', 'animate-pulse');
+                }
+
+                if (examTimeSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    finishExam(true);
+                }
+            }, 1000);
+        }
+
+        function renderQuestion(index) {
+            currentQuestionIdx = index;
+            const qData = questions[index];
+
+            document.getElementById('current-question-num').innerText = index + 1;
+            document.getElementById('question-text').innerText = qData.q;
+
+            // Code snippet container
+            const codeContainer = document.getElementById('code-snippet-container');
+            const codeEl = document.getElementById('code-snippet');
+            if (qData.code) {
+                codeEl.innerText = qData.code;
+                codeContainer.classList.remove('hidden');
+            } else {
+                codeContainer.classList.add('hidden');
+            }
+
+            // Options rendering
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const prefixes = ['A', 'B', 'C', 'D', 'E'];
+            qData.opts.forEach((optText, optIdx) => {
+                const isSelected = userAnswers[index] === optIdx;
+                const optBtn = document.createElement('div');
+                optBtn.className = `p-4 rounded-xl border cursor-pointer transition flex items-start gap-3 ${
+                    isSelected 
+                        ? 'bg-blue-900/40 border-blue-500 text-white font-medium shadow-md shadow-blue-500/10' 
+                        : 'bg-slate-900/60 border-slate-700/80 text-slate-200 hover:border-slate-500 hover:bg-slate-700/30'
+                }`;
+                optBtn.onclick = () => selectOption(optIdx);
+
+                optBtn.innerHTML = `
+                    <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                        isSelected ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 border border-slate-700'
+                    }">${prefixes[optIdx]}</span>
+                    <span class="text-sm pt-0.5 leading-relaxed">${escapeHtml(optText)}</span>
+                `;
+                optionsContainer.appendChild(optBtn);
+            });
+
+            // Update Flag Button Status
+            updateFlagBtnUI();
+
+            // Update Prev/Next Buttons
+            document.getElementById('prev-btn').disabled = (index === 0);
+            document.getElementById('prev-btn').style.opacity = (index === 0) ? '0.5' : '1';
+            
+            const nextBtn = document.getElementById('next-btn');
+            if (index === questions.length - 1) {
+                nextBtn.innerHTML = `<span>Selesai</span> <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            } else {
+                nextBtn.innerHTML = `<span>Berikutnya</span> <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+            }
+
+            highlightGridNav();
+        }
+
+        function selectOption(optIdx) {
+            userAnswers[currentQuestionIdx] = optIdx;
+            renderQuestion(currentQuestionIdx);
+            updateAnsweredCount();
+        }
+
+        function toggleFlag() {
+            userFlags[currentQuestionIdx] = !userFlags[currentQuestionIdx];
+            updateFlagBtnUI();
+            highlightGridNav();
+        }
+
+        function updateFlagBtnUI() {
+            const flagBtn = document.getElementById('flag-btn');
+            const flagText = document.getElementById('flag-text');
+            if (userFlags[currentQuestionIdx]) {
+                flagBtn.className = "text-xs px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition border-amber-500 bg-amber-500/20 text-amber-300 font-semibold";
+                flagText.innerText = "Ragu-ragu (Aktif)";
+            } else {
+                flagBtn.className = "text-xs px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition border-slate-600 text-slate-400 hover:border-amber-500 hover:text-amber-400";
+                flagText.innerText = "Ragu-ragu";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIdx < questions.length - 1) {
+                renderQuestion(currentQuestionIdx + 1);
+            } else {
+                confirmSubmitExam();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIdx > 0) {
+                renderQuestion(currentQuestionIdx - 1);
+            }
+        }
+
+        function renderGridNav() {
+            const gridContainer = document.getElementById('question-grid');
+            gridContainer.innerHTML = '';
+
+            for (let i = 0; i < 100; i++) {
+                const btn = document.createElement('button');
+                btn.id = `grid-num-${i}`;
+                btn.className = getGridBtnClass(i);
+                btn.innerText = i + 1;
+                btn.onclick = () => renderQuestion(i);
+                gridContainer.appendChild(btn);
+            }
+            updateAnsweredCount();
+        }
+
+        function getGridBtnClass(i) {
+            const isCurrent = i === currentQuestionIdx;
+            const isAnswered = userAnswers[i] !== null;
+            const isFlagged = userFlags[i];
+
+            let base = "w-full aspect-square rounded-lg text-xs font-bold transition flex items-center justify-center border ";
+            if (isCurrent) {
+                base += "ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-800 ";
+            }
+
+            if (isFlagged) {
+                return base + "bg-amber-500 text-slate-950 border-amber-400";
+            } else if (isAnswered) {
+                return base + "bg-emerald-600 text-white border-emerald-500";
+            } else {
+                return base + "bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500";
+            }
+        }
+
+        function highlightGridNav() {
+            for (let i = 0; i < 100; i++) {
+                const btn = document.getElementById(`grid-num-${i}`);
+                if (btn) btn.className = getGridBtnClass(i);
+            }
+        }
+
+        function updateAnsweredCount() {
+            const count = userAnswers.filter(a => a !== null).length;
+            document.getElementById('answered-count-badge').innerText = `${count} / 100`;
+        }
+
+        function confirmSubmitExam() {
+            const unanswered = userAnswers.filter(a => a === null).length;
+            let msg = "Apakah Anda yakin ingin mengakhiri dan mengumpulkan hasil ujian ini?";
+            if (unanswered > 0) {
+                msg = `Masih terdapat ${unanswered} soal yang belum dijawab! ` + msg;
+            }
+
+            showModal("Konfirmasi Selesai Ujian", msg, () => {
+                finishExam(false);
+            });
+        }
+
+        /* ==========================================================================
+           6. RESULT CALCULATION & REPORT GENERATION
+           ========================================================================== */
+        function finishExam(isTimeOut = false) {
+            isExamFinished = true;
+            clearInterval(timerInterval);
+
+            // Calculate Score
+            let correctCount = 0;
+            let wrongCount = 0;
+            let emptyCount = 0;
+
+            questions.forEach((q, idx) => {
+                const ans = userAnswers[idx];
+                if (ans === null) {
+                    emptyCount++;
+                } else if (ans === q.ans) {
+                    correctCount++;
+                } else {
+                    wrongCount++;
+                }
+            });
+
+            const finalScore = Math.round((correctCount / questions.length) * 100);
+
+            // Display Results UI
+            document.getElementById('exam-view').classList.add('hidden');
+            document.getElementById('top-exam-status').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+
+            document.getElementById('res-nama').innerText = studentInfo.nama;
+            document.getElementById('res-kelas').innerText = studentInfo.kelas;
+            document.getElementById('res-nis').innerText = studentInfo.nis;
+            document.getElementById('res-violation').innerText = `${violationCount} Kali Terdeteksi`;
+
+            document.getElementById('res-score').innerText = finalScore;
+            document.getElementById('res-correct').innerText = correctCount;
+            document.getElementById('res-wrong').innerText = wrongCount;
+            document.getElementById('res-empty').innerText = emptyCount;
+
+            const gradeBadge = document.getElementById('res-grade-status');
+            if (finalScore >= 75) {
+                gradeBadge.innerText = "LULUS (KOMPETEN)";
+                gradeBadge.className = "text-xs px-3 py-1 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+            } else {
+                gradeBadge.innerText = "BELUM LULUS (REMEDIAL)";
+                gradeBadge.className = "text-xs px-3 py-1 rounded-full font-bold bg-red-500/20 text-red-300 border border-red-500/40";
+            }
+
+            // Encrypted payload string for teacher verification
+            const verifyObj = {
+                n: studentInfo.nama,
+                k: studentInfo.kelas,
+                id: studentInfo.nis,
+                s: finalScore,
+                c: correctCount,
+                w: wrongCount,
+                v: violationCount,
+                t: new Date().toLocaleTimeString('id-ID')
+            };
+            const encodedData = btoa(JSON.stringify(verifyObj));
+            
+            const resultText = `*HASIL UJIAN ONLINE BASCOM-AVR (ATMega8535)*\n` +
+                `------------------------------------\n` +
+                `Nama : ${studentInfo.nama}\n` +
+                `Kelas : ${studentInfo.kelas}\n` +
+                `NIS   : ${studentInfo.nis}\n` +
+                `Nilai : ${finalScore} / 100 (${finalScore >= 75 ? 'LULUS' : 'REMEDIAL'})\n` +
+                `Rincian : ${correctCount} Benar | ${wrongCount} Salah | ${emptyCount} Kosong\n` +
+                `Pelanggaran : ${violationCount}x\n` +
+                `------------------------------------\n` +
+                `Kode Verifikasi: RESULT_BASCOM#${encodedData}`;
+
+            document.getElementById('verification-hash').value = resultText;
+
+            renderReviewSection();
+
+            if (isTimeOut) {
+                showModal("Waktu Habis!", "Waktu ujian telah habis. Jawaban Anda telah tersimpan secara otomatis.", null, true);
+            }
+        }
+
+        function handlePrint() {
+            // Keluar dari Fullscreen jika aktif agar dialog window.print() dapat muncul dengan normal
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                const exitPromise = document.exitFullscreen ? document.exitFullscreen() : (document.webkitExitFullscreen ? document.webkitExitFullscreen() : Promise.resolve());
+                Promise.resolve(exitPromise).then(() => {
+                    setTimeout(() => window.print(), 300);
+                }).catch(() => {
+                    window.print();
+                });
+            } else {
+                window.print();
+            }
+        }
+
+        function copyFormattedResult() {
+            const textarea = document.getElementById('verification-hash');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+            } catch (err) {
+                success = false;
+            }
+
+            if (!success && navigator.clipboard) {
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    showModal("Berhasil Disalin!", "Teks rekap hasil ujian berhasil disalin. Silakan buka WhatsApp / Google Classroom dan tempel (paste) di sana.", null, true);
+                }).catch(() => {
+                    showModal("Petunjuk", "Silakan pilih/blok manual seluruh teks di dalam kotak, lalu tekan Ctrl+C untuk menyalin.", null, true);
+                });
+            } else if (success) {
+                showModal("Berhasil Disalin!", "Teks rekap hasil ujian berhasil disalin ke clipboard! Silakan buka WhatsApp / Google Classroom lalu tempel (paste).", null, true);
+            } else {
+                showModal("Petunjuk Salin", "Silakan blok teks di kotak lalu pilih Salin.", null, true);
+            }
+        }
+
+        function sendToWhatsApp() {
+            const text = document.getElementById('verification-hash').value;
+            const encodedText = encodeURIComponent(text);
+            const waUrl = `https://wa.me/?text=${encodedText}`;
+            window.open(waUrl, '_blank');
+        }
+
+        function renderReviewSection() {
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+
+            const prefixes = ['A', 'B', 'C', 'D', 'E'];
+
+            questions.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                const isCorrect = uAns === q.ans;
+                const isUnanswered = uAns === null;
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border text-sm space-y-2 ${
+                    isCorrect ? 'bg-emerald-950/20 border-emerald-800/60' : 'bg-red-950/20 border-red-800/60'
+                }`;
+
+                let statusBadge = isCorrect 
+                    ? '<span class="text-xs font-bold text-emerald-400 bg-emerald-950 border border-emerald-700 px-2 py-0.5 rounded">BENAR</span>'
+                    : isUnanswered 
+                        ? '<span class="text-xs font-bold text-slate-400 bg-slate-900 border border-slate-700 px-2 py-0.5 rounded">TIDAK DIJAWAB</span>'
+                        : '<span class="text-xs font-bold text-red-400 bg-red-950 border border-red-700 px-2 py-0.5 rounded">SALAH</span>';
+
+                let userAnsText = isUnanswered ? "-" : `${prefixes[uAns]}. ${q.opts[uAns]}`;
+                let correctAnsText = `${prefixes[q.ans]}. ${q.opts[q.ans]}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between font-bold border-b border-slate-800 pb-2">
+                        <span class="text-slate-300">Soal #${idx + 1}</span>
+                        ${statusBadge}
+                    </div>
+                    <p class="text-slate-200">${escapeHtml(q.q)}</p>
+                    ${q.code ? `<pre class="bg-slate-950 p-2 rounded text-xs text-emerald-400 font-mono overflow-x-auto"><code>${escapeHtml(q.code)}</code></pre>` : ''}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                        <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                            <span class="text-slate-400 block">Jawaban Anda:</span>
+                            <span class="font-semibold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}">${escapeHtml(userAnsText)}</span>
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                            <span class="text-slate-400 block">Kunci Jawaban:</span>
+                            <span class="font-semibold text-emerald-400">${escapeHtml(correctAnsText)}</span>
+                        </div>
+                    </div>
+                    <div class="bg-blue-950/40 border border-blue-900/60 p-2.5 rounded text-xs text-blue-300 mt-2">
+                        <b>Pembahasan:</b> ${escapeHtml(q.exp)}
+                    </div>
+                `;
+                reviewList.appendChild(card);
+            });
+        }
+
+        function toggleReviewSection() {
+            const container = document.getElementById('review-container');
+            const btnText = document.getElementById('review-btn-text');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                btnText.innerText = "Sembunyikan Pembahasan";
+            } else {
+                container.classList.add('hidden');
+                btnText.innerText = "Lihat Pembahasan Soal";
+            }
+        }
+
+        function copyVerificationCode() {
+            const input = document.getElementById('verification-hash');
+            input.select();
+            document.execCommand('copy');
+            showModal("Berhasil Disalin", "Kode hasil verifikasi ujian berhasil disalin ke clipboard! Silakan kirimkan kode ini kepada Guru Anda.", null, true);
+        }
+
+        /* ==========================================================================
+           7. MODAL HELPERS & UTILITIES
+           ========================================================================== */
+        function showModal(title, msg, onConfirm = null, isAlertOnly = false) {
+            const overlay = document.getElementById('modal-overlay');
+            const titleEl = document.getElementById('modal-title');
+            const msgEl = document.getElementById('modal-msg');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+
+            titleEl.innerText = title;
+            msgEl.innerText = msg;
+
+            if (isAlertOnly) {
+                cancelBtn.classList.add('hidden');
+                confirmBtn.innerText = "Tutup";
+                confirmBtn.onclick = () => {
+                    overlay.classList.add('hidden');
+                };
+            } else {
+                cancelBtn.classList.remove('hidden');
+                confirmBtn.innerText = "Ya, Lanjutkan";
+                cancelBtn.onclick = () => overlay.classList.add('hidden');
+                confirmBtn.onclick = () => {
+                    overlay.classList.add('hidden');
+                    if (onConfirm) onConfirm();
+                };
+            }
+            overlay.classList.remove('hidden');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
